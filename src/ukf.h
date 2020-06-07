@@ -4,6 +4,9 @@
 #include "Eigen/Dense"
 #include "measurement_package.h"
 
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+
 class UKF {
  public:
   /**
@@ -40,6 +43,31 @@ class UKF {
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+    
+  /**
+   *   Generate sigma points:
+   *  @param x : State vector.
+   *  @param P : Covariance matrix.
+   *  @param lambda: Sigma points spreading parameter.
+   *  @param n_sig: Sigma points dimension.
+   */
+  MatrixXd GenerateSigmaPoints(VectorXd x, MatrixXd P, double lambda, int n_sig);
+
+  /**
+   * Predits sigma points.
+   * @param Xsig : Sigma points to predict.
+   * @param delta_t : Time between k and k+1 in s
+   * @param n_x : State dimension.
+   * @param n_sig : Sigma points dimension.
+   * @param nu_am : Process noise standard deviation longitudinal acceleration in m/s^2
+   * @param nu_yawdd : Process noise standard deviation yaw acceleration in rad/s^2
+   */
+  MatrixXd PredictSigmaPoints(MatrixXd Xsig, double delta_t, int n_x, int n_sig, double nu_am, double nu_yawdd);
+
+  /**
+   *  Normalized the component `index` of the vector `vector` to be inside [-M_PI, M_PI] interval.
+   */
+  void NormalizeAngleOnComponent(VectorXd vector, int index);
 
 
   // initially set to false, set to true in first call of ProcessMeasurement
@@ -95,6 +123,21 @@ class UKF {
 
   // Sigma point spreading parameter
   double lambda_;
+    
+  ///* Sigma points dimension
+  int n_sig_;
+    
+  //the current NIS for radar
+  double NIS_radar_;
+
+  // the current NIS for laser
+  double NIS_laser_;
+    
+  // Radar measurement noise covariance matrix
+  MatrixXd R_radar_;
+
+  //Lidar measurement noise covariance matrix
+  MatrixXd R_lidar_;
 };
 
 #endif  // UKF_H
